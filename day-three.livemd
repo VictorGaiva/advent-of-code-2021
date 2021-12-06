@@ -1,0 +1,115 @@
+# Day 3: Binary Diagnostic
+
+## Part One
+
+```elixir
+Mix.install([{:kino, github: "livebook-dev/kino"}])
+```
+
+```elixir
+# The input
+input = Kino.Input.textarea("")
+```
+
+```elixir
+defmodule Helpers do
+  def from_string(entry) do
+    entry
+    |> String.to_charlist()
+    |> Enum.map(&(&1 - 48))
+  end
+
+  def most_common_bit(entry) do
+    entry
+    |> Enum.map(&(&1 - 0.5))
+    |> Enum.sum()
+  end
+
+  def parse_input(input) do
+    input
+    |> Kino.Input.read()
+    |> String.split("\n", trim: true)
+  end
+end
+```
+
+```elixir
+import Helpers
+
+input
+|> parse_input()
+|> Enum.map(&from_string/1)
+|> Enum.zip()
+|> Enum.map(&Tuple.to_list/1)
+|> Enum.map(&most_common_bit/1)
+|> Enum.map(&if(&1 > 0, do: [49, 48], else: [48, 49]))
+|> Enum.zip()
+|> Enum.map(&Tuple.to_list/1)
+|> Enum.map(&to_string/1)
+# # And parse them as binary integers
+|> Enum.map(&Integer.parse(&1, 2))
+|> Enum.map(fn {value, _} -> value end)
+|> Enum.reduce(&*/2)
+```
+
+## Part Two
+
+```elixir
+input = Kino.Input.textarea("")
+```
+
+```elixir
+import Helpers
+
+defmodule PartTwo do
+  def oxygen(current) do
+    resolve(current, 0, 1)
+  end
+
+  def co2(current) do
+    resolve(current, 0, 0)
+  end
+
+  def resolve([current | []], _, _) do
+    current
+  end
+
+  def resolve(current, at, value) do
+    current
+    |> Enum.map(&Enum.at(&1, at))
+    |> most_common_bit()
+    |> case do
+      x when x < 0 ->
+        current
+        |> Enum.filter(&(Enum.at(&1, at) != value))
+
+      0 ->
+        current
+        |> Enum.filter(&(Enum.at(&1, at) != value))
+
+      _ ->
+        current
+        |> Enum.filter(&(Enum.at(&1, at) == value))
+    end
+    |> resolve(at + 1, value)
+  end
+end
+
+parsed = input |> parse_input() |> Enum.map(&from_string/1)
+
+{oxygen, _} =
+  parsed
+  |> PartTwo.oxygen()
+  |> Enum.map(&(&1 + 48))
+  |> to_string()
+  |> Integer.parse(2)
+
+{co2, _} =
+  parsed
+  |> PartTwo.co2()
+  |> Enum.map(&(&1 + 48))
+  |> to_string()
+  |> Integer.parse(2)
+
+oxygen * co2
+```

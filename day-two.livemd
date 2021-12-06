@@ -1,0 +1,71 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# Day 2: Dive!
+
+## Part One
+
+```elixir
+# Install Kino
+Mix.install([{:kino, github: "livebook-dev/kino"}])
+```
+
+```output
+:ok
+```
+
+```elixir
+# The input
+input = Kino.Input.textarea("")
+```
+
+```elixir
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(&String.split(&1, " "))
+|> Enum.map(fn
+  ["forward", amount] -> [String.to_integer(amount), 0]
+  ["down", amount] -> [0, String.to_integer(amount)]
+  ["up", amount] -> [0, -String.to_integer(amount)]
+end)
+|> Enum.zip()
+|> Enum.map(&Tuple.to_list/1)
+|> Enum.map(&Enum.sum/1)
+|> Enum.reduce(&*/2)
+```
+
+```output
+1648020
+```
+
+## Part Two
+
+
+
+```elixir
+input = Kino.Input.textarea("")
+```
+
+```elixir
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(&String.split(&1, " "))
+|> Enum.map(fn
+  ["forward", amount] -> [String.to_integer(amount), 0]
+  ["down", amount] -> [0, String.to_integer(amount)]
+  ["up", amount] -> [0, -String.to_integer(amount)]
+end)
+|> Enum.reduce(
+  [0, 0, 0],
+  fn
+    [forward, 0], [x, y, aim] -> [x + forward, y + forward * aim, aim]
+    [0, down_or_up], [x, y, aim] -> [x, y, aim + down_or_up]
+  end
+)
+|> (fn [x, y, _] -> x * y end).()
+```
+
+```output
+1759818555
+```

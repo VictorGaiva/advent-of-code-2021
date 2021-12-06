@@ -1,0 +1,70 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# Day 1: Sonar Sweep
+
+## Part 1
+
+```elixir
+# Install Kino
+Mix.install([{:kino, github: "livebook-dev/kino"}])
+```
+
+```output
+* Getting kino (https://github.com/livebook-dev/kino.git)
+remote: Enumerating objects: 488, done.        
+remote: Counting objects: 100% (488/488), done.        
+remote: Compressing objects: 100% (351/351), done.        
+remote: Total 488 (delta 269), reused 274 (delta 118), pack-reused 0        
+origin/HEAD set to main
+==> kino
+Compiling 19 files (.ex)
+Generated kino app
+```
+
+```output
+:ok
+```
+
+## Section
+
+This is my attempt and following all the Advent of Code challanges of 2021. Inspired by José Valim's livestream, I'll be doing it using Livebook.
+
+```elixir
+# The input
+input = Kino.Input.textarea("Provide the input for the execution of part one: ")
+```
+
+```elixir
+# The main pipeline
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(&String.to_integer/1)
+|> Enum.chunk_every(2, 1, :discard)
+|> Enum.count(fn [first, second] -> second > first end)
+```
+
+```output
+1759
+```
+
+## Part 2
+
+```elixir
+input = Kino.Input.textarea("Provide the input for the execution of part two: ")
+```
+
+```elixir
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(&String.to_integer/1)
+|> Enum.chunk_every(3, 1, :discard)
+|> Enum.map(&Enum.sum/1)
+|> Enum.chunk_every(2, 1, :discard)
+|> Enum.count(fn [first, second] -> second > first end)
+```
+
+```output
+1805
+```
