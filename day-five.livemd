@@ -55,15 +55,13 @@ defmodule PartOne do
   end
 
   def solve(grid, [{{x, y1}, {x, y2}} | rest]) do
-    [y1..y2 |> Enum.map(fn _ -> x end), Enum.to_list(y1..y2)]
-    |> Enum.zip()
+    Enum.zip(Stream.cycle([x]), y1..y2)
     |> Enum.reduce(grid, &inc_at/2)
     |> solve(rest)
   end
 
   def solve(grid, [{{x1, y}, {x2, y}} | rest]) do
-    [Enum.to_list(x1..x2), x1..x2 |> Enum.map(fn _ -> y end)]
-    |> Enum.zip()
+    Enum.zip(x1..x2, Stream.cycle([y]))
     |> Enum.reduce(grid, &inc_at/2)
     |> solve(rest)
   end
@@ -121,8 +119,7 @@ defmodule PartTwo do
   end
 
   def solve(grid, [{{x1, y1}, {x2, y2}} | rest]) do
-    [Enum.to_list(x1..x2), Enum.to_list(y1..y2)]
-    |> Enum.zip()
+    Enum.zip(x1..x2, y1..y2)
     |> Enum.reduce(grid, &PartOne.inc_at/2)
     |> solve(rest)
   end
