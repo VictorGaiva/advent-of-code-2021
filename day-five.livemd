@@ -1,0 +1,135 @@
+# Day 5: Hydrothermal Venture
+
+## Section
+
+```elixir
+Mix.install([{:kino, github: "livebook-dev/kino"}])
+```
+
+```elixir
+input = Kino.Input.textarea("")
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.map(&String.split(&1, " -> ", trim: true))
+  |> Enum.map(fn line ->
+    Enum.map(line, fn pos ->
+      String.split(pos, ",", trim: true)
+      |> Enum.map(&String.to_integer/1)
+      |> List.to_tuple()
+    end)
+    |> List.to_tuple()
+  end)
+```
+
+```elixir
+max =
+  lines
+  |> Enum.map(fn {{x1, y1}, {x2, y2}} -> [x1, x2, y1, y2] end)
+  |> Enum.flat_map(& &1)
+  |> Enum.max()
+
+grid = Enum.map(0..max, fn _ -> Enum.map(0..max, fn _ -> 0 end) end)
+```
+
+```elixir
+filtered =
+  Enum.filter(
+    lines,
+    fn
+      {{x, _}, {x, _}} -> true
+      {{_, y}, {_, y}} -> true
+      _ -> false
+    end
+  )
+```
+
+```elixir
+defmodule PartOne do
+  def solve(grid, []) do
+    grid
+  end
+
+  def solve(grid, [{{x, y1}, {x, y2}} | rest]) do
+    [y1..y2 |> Enum.map(fn _ -> x end), Enum.to_list(y1..y2)]
+    |> Enum.zip()
+    |> Enum.reduce(grid, &inc_at/2)
+    |> solve(rest)
+  end
+
+  def solve(grid, [{{x1, y}, {x2, y}} | rest]) do
+    [Enum.to_list(x1..x2), x1..x2 |> Enum.map(fn _ -> y end)]
+    |> Enum.zip()
+    |> Enum.reduce(grid, &inc_at/2)
+    |> solve(rest)
+  end
+
+  def inc_at({x, y}, grid) do
+    grid
+    |> map_at(x, fn rows -> map_at(rows, y, &(&1 + 1)) end)
+  end
+
+  def map_at(array, index, fun) do
+    array
+    |> Enum.with_index()
+    |> Enum.map(fn
+      {value, ^index} -> fun.(value)
+      {value, _} -> value
+    end)
+  end
+
+  def score(grid) do
+    grid
+    |> Enum.flat_map(& &1)
+    |> Enum.filter(&(&1 > 1))
+    |> length()
+  end
+
+  def transpose(entries) do
+    entries
+    |> Enum.zip()
+    |> Enum.map(&Tuple.to_list/1)
+  end
+end
+
+grid
+|> PartOne.solve(filtered)
+|> PartOne.transpose()
+|> PartOne.score()
+```
+
+```elixir
+diagonals =
+  Enum.filter(
+    lines,
+    fn
+      {{x, _}, {x, _}} -> false
+      {{_, y}, {_, y}} -> false
+      _ -> true
+    end
+  )
+```
+
+```elixir
+defmodule PartTwo do
+  def solve(grid, []) do
+    grid
+  end
+
+  def solve(grid, [{{x1, y1}, {x2, y2}} | rest]) do
+    [Enum.to_list(x1..x2), Enum.to_list(y1..y2)]
+    |> Enum.zip()
+    |> Enum.reduce(grid, &PartOne.inc_at/2)
+    |> solve(rest)
+  end
+end
+
+grid
+|> PartOne.solve(filtered)
+|> PartTwo.solve(diagonals)
+|> PartOne.score()
+```

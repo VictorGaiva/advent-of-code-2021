@@ -1,0 +1,110 @@
+# Day 4: Giant Squid
+
+## Section
+
+```elixir
+Mix.install([{:kino, github: "livebook-dev/kino"}])
+```
+
+```elixir
+input = Kino.Input.textarea("")
+```
+
+```elixir
+[draws | boards] =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n\n", trim: true)
+```
+
+```elixir
+draws = draws |> String.split(",", trim: true) |> Enum.map(&String.to_integer/1)
+```
+
+```elixir
+boards =
+  boards
+  |> Enum.map(&String.split(&1, "\n", trim: true))
+  |> Enum.map(fn board -> Enum.map(board, &String.split(&1, " ", trim: true)) end)
+  |> Enum.map(fn board -> Enum.map(board, fn row -> Enum.map(row, &String.to_integer/1) end) end)
+```
+
+```elixir
+defmodule PartOne do
+  def solve(boards, []) do
+    boards
+  end
+
+  def solve(boards, [draw | rest]) do
+    markeds =
+      boards
+      |> Enum.map(&mark(&1, draw))
+
+    if bingo = Enum.find(markeds, &bingo?/1) do
+      score(bingo) * draw
+    else
+      solve(markeds, rest)
+    end
+  end
+
+  def mark(board, draw) do
+    board
+    |> Enum.map(fn row -> Enum.map(row, &if(&1 == draw, do: -1, else: &1)) end)
+  end
+
+  def score(board) do
+    board
+    |> Enum.flat_map(& &1)
+    |> Enum.reject(&(&1 == -1))
+    |> Enum.sum()
+  end
+
+  def bingo?(board) do
+    cond do
+      board |> Enum.any?(fn row -> Enum.all?(row, &(&1 == -1)) end) ->
+        true
+
+      board |> transpose() |> Enum.any?(fn row -> Enum.all?(row, &(&1 == -1)) end) ->
+        true
+
+      true ->
+        false
+    end
+  end
+
+  def transpose(entries) do
+    entries
+    |> Enum.zip()
+    |> Enum.map(&Tuple.to_list/1)
+  end
+end
+
+PartOne.solve(boards, draws)
+```
+
+```elixir
+defmodule PartTwo do
+  def solve(_boards, 0) do
+    0
+  end
+
+  def solve([board], [draw | rest]) do
+    board = PartOne.mark(board, draw)
+
+    if PartOne.bingo?(board) do
+      PartOne.score(board) * draw
+    else
+      solve([board], rest)
+    end
+  end
+
+  def solve(boards, [draw | rest]) do
+    boards
+    |> Enum.map(&PartOne.mark(&1, draw))
+    |> Enum.reject(&PartOne.bingo?/1)
+    |> solve(rest)
+  end
+end
+
+PartTwo.solve(boards, draws)
+```
