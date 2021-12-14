@@ -1,0 +1,127 @@
+# Day 8: Seven Segment Search
+
+## Section
+
+```elixir
+Mix.install([
+  {:kino, github: "livebook-dev/kino"},
+  {:witchcraft, github: "witchcrafters/witchcraft"}
+])
+```
+
+```elixir
+use Witchcraft
+```
+
+```elixir
+input = Kino.Input.textarea("")
+```
+
+```elixir
+data =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n")
+  ~> (&String.split(&1, " | "))
+
+[_, output] =
+  data
+  |> Enum.zip()
+  ~> (&Tuple.to_list/1)
+  ~> (&(&1 ~> fn x -> String.split(x, " ") end))
+
+[["a b"], ["c d"]]
+|> peel((&String.split/1) <~> (&ap/2))
+
+# data =
+#   data
+#   ~> (&(&1 ~> fn x -> String.split(x, " ") end))
+```
+
+```elixir
+entries = %{
+  2 => "1",
+  4 => "4",
+  3 => "7",
+  7 => "8"
+}
+```
+
+```elixir
+output
+~> (&(&1 ~> fn x -> length(x) end))
+~> (&Enum.filter(&1, fn x -> entries[x] end))
+~> (&length/1)
+|> Enum.sum()
+```
+
+```elixir
+sort_str = fn str ->
+  str
+  |> String.split("", trim: true)
+  |> Enum.sort()
+  |> List.to_string()
+end
+```
+
+```elixir
+"cba"
+|> (&sort_str.(&1)).()
+```
+
+```elixir
+sorted =
+  data
+  ~> fn x ->
+    x
+    ~> fn y ->
+      y
+      ~> (&sort_str.(&1))
+      |> Enum.sort_by(&length/1)
+    end
+  end
+```
+
+```elixir
+sorted
+~> fn [input, _] -> input ~> (&String.split(&1, "", trim: true)) end
+~> (&Enum.reduce(&1, %{}, fn acc, x -> nil end))
+```
+
+```elixir
+sorted
+~> fn x ->
+  x
+  ~> fn y ->
+    y ~> (&String.split(&1, "", trim: true))
+  end
+end
+~> fn [input, output] ->
+  output
+  ~> fn
+    [_, _] -> 1
+    [_, _, _] -> 7
+    [_, _, _, _] -> 4
+    [_, _, _, _, _, _, _] -> 8
+    _ -> -1
+  end
+end
+```
+
+```elixir
+entries = %{
+  "abcdef" => 9,
+  "abcdefg" => 8,
+  "abcdeg" => 0,
+  "abcdf" => 3,
+  "acdfg" => 2,
+  "bcdef" => 5,
+  "bcdefg" => 6,
+  "bg" => 1,
+  "cdeg" => 4,
+  "cdg" => 7
+}
+
+# output
+# ~> (fn x -> x ~> &sort_str.(&1) end)
+```

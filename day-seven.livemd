@@ -1,0 +1,67 @@
+# Day 7: The Treachery of Whales
+
+## Section
+
+```elixir
+Mix.install([
+  {:kino, github: "livebook-dev/kino"},
+  {:witchcraft, github: "witchcrafters/witchcraft"}
+])
+```
+
+```elixir
+use Witchcraft
+```
+
+```elixir
+input = Kino.Input.textarea("")
+```
+
+```elixir
+positions =
+  input
+  |> Kino.Input.read()
+  |> String.split(",", trim: true)
+  ~> (&String.to_integer/1)
+```
+
+```elixir
+defmodule PartOne do
+  def solve(positions) do
+    min(positions)..max(positions)
+    |> Enum.map(& &1)
+    ~> (&{fuel_to(positions, &1), &1})
+    |> min()
+  end
+
+  def fuel_to(positions, target) do
+    positions
+    ~> (&(&1 - target))
+    ~> (&abs/1)
+    |> Enum.sum()
+  end
+end
+
+PartOne.solve(positions)
+```
+
+```elixir
+defmodule PartTwo do
+  def solve(positions) do
+    min(positions)..max(positions)
+    |> Enum.map(& &1)
+    ~> (&{fuel_to(positions, &1), &1})
+    |> min()
+  end
+
+  def fuel_to(positions, target) do
+    positions
+    ~> (&(&1 - target))
+    ~> (&abs/1)
+    ~> (&(&1 * (&1 + 1) / 2))
+    |> Enum.sum()
+  end
+end
+
+PartTwo.solve(positions)
+```

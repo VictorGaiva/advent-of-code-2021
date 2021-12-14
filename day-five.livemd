@@ -3,7 +3,14 @@
 ## Section
 
 ```elixir
-Mix.install([{:kino, github: "livebook-dev/kino"}])
+Mix.install([
+  {:kino, github: "livebook-dev/kino"},
+  {:witchcraft, github: "witchcrafters/witchcraft"}
+])
+```
+
+```elixir
+use Witchcraft
 ```
 
 ```elixir
@@ -15,15 +22,8 @@ lines =
   input
   |> Kino.Input.read()
   |> String.split("\n", trim: true)
-  |> Enum.map(&String.split(&1, " -> ", trim: true))
-  |> Enum.map(fn line ->
-    Enum.map(line, fn pos ->
-      String.split(pos, ",", trim: true)
-      |> Enum.map(&String.to_integer/1)
-      |> List.to_tuple()
-    end)
-    |> List.to_tuple()
-  end)
+  ~> (&String.split(&1, " -> ", trim: true))
+  ~> (&String.split(&1, ",", trim: true))
 ```
 
 ```elixir

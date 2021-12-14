@@ -1,0 +1,50 @@
+# Day 6: Lanternfish
+
+## Section
+
+```elixir
+Mix.install([
+  {:kino, github: "livebook-dev/kino"},
+  {:witchcraft, github: "witchcrafters/witchcraft"}
+])
+```
+
+```elixir
+use Witchcraft
+```
+
+```elixir
+input = Kino.Input.textarea("")
+```
+
+```elixir
+school =
+  input
+  |> Kino.Input.read()
+  |> String.split(",", trim: true)
+  ~> (&String.to_integer/1)
+  |> Enum.frequencies()
+```
+
+```elixir
+population =
+  0..8
+  |> Enum.map(&Map.get(school, &1, 0))
+```
+
+```elixir
+defmodule PartOne do
+  def solve(population, 0) do
+    Enum.sum(population)
+  end
+
+  def solve([breeders | population], left) do
+    population
+    |> List.update_at(6, &(&1 + breeders))
+    |> (&(&1 ++ [breeders])).()
+    |> solve(left - 1)
+  end
+end
+
+PartOne.solve(population, 256)
+```
